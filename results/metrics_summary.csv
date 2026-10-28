@@ -1,0 +1,9 @@
+Model,Dataset,Accuracy,Precision,Recall,F1-Score
+Logistic Regression,ISOT Test,0.9933,0.9933,0.9933,0.9933
+Support Vector Machine,ISOT Test,0.9982,0.9982,0.9982,0.9982
+Logistic Regression,LIAR Generalization,0.4562,0.5414,0.511,0.372
+Support Vector Machine,LIAR Generalization,0.4451,0.5304,0.5042,0.3389
+Bidirectional LSTM,ISOT Test,0.9973,0.9974,0.9973,0.9973
+Bidirectional LSTM,LIAR Generalization,0.4365,0.2182,0.5,0.3038
+BERT Fine-Tuned,ISOT Test,0.964,0.9644,0.966,0.964
+BERT Fine-Tuned,LIAR Generalization,0.4633,0.4926,0.4942,0.4452

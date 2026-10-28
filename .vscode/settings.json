@@ -1,0 +1,22 @@
+{
+  "python.defaultInterpreterPath": "C:\\Users\\Hp\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/src",
+    "C:\\Users\\Hp\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages",
+    "C:\\Users\\Hp\\AppData\\Roaming\\Python\\Python313\\site-packages"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/src",
+    "C:\\Users\\Hp\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages",
+    "C:\\Users\\Hp\\AppData\\Roaming\\Python\\Python313\\site-packages"
+  ],
+  "pyright.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/src",
+    "C:\\Users\\Hp\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages",
+    "C:\\Users\\Hp\\AppData\\Roaming\\Python\\Python313\\site-packages"
+  ]
+}
+

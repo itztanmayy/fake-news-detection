@@ -1,0 +1,19 @@
+# Fake News Detection System - Dependencies
+# Course: CSET485 - AI and Society, Bennett University
+# Team ID: 39 (Tanmay Awal, Pratham Mishra, Arpit Sharma, Akshat Dhaka)
+
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+wordcloud>=1.9.0
+nltk>=3.8.0
+tqdm>=4.65.0
+streamlit>=1.25.0
+nbformat>=5.9.0
+requests>=2.31.0
+

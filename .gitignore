@@ -1,0 +1,59 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Streamlit local config
+.streamlit/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Large Datasets (>100MB, reproducible via py -3 src/download_data.py && py -3 src/preprocess.py)
+data/raw/
+data/processed/
+
+# Large Pretrained Transformer Weights (>100MB GitHub limit)
+*.safetensors
+*.bin

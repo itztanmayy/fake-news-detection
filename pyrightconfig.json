@@ -1,0 +1,16 @@
+{
+  "include": [
+    ".",
+    "src"
+  ],
+  "pythonPath": "C:\\Users\\Hp\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "extraPaths": [
+    ".",
+    "src",
+    "C:\\Users\\Hp\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages",
+    "C:\\Users\\Hp\\AppData\\Roaming\\Python\\Python313\\site-packages"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingTypeStubs": "none"
+}
+
