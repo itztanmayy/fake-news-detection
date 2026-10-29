@@ -45,6 +45,9 @@ venv.bak/
 
 # Streamlit local config
 .streamlit/
+!.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 
 # OS specific
 .DS_Store

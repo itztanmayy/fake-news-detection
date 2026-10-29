@@ -20,24 +20,65 @@ from src.train_lstm import BiLSTMClassifier
 from transformers import BertTokenizer, BertForSequenceClassification
 
 st.set_page_config(
-    page_title="Fake News Detection System",
-    page_icon="📰",
+    page_title="News Signal",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Header
-st.title("📰 Fake News Detection System")
 st.markdown("""
-**Course:** CSET485 – AI and Society, Bennett University  
-**Team ID:** 39 | **Team Members:** Tanmay Awal, Pratham Mishra, Arpit Sharma, Akshat Dhaka
----
-""")
+<style>
+:root { --ink: #202b25; --muted: #59645d; --canvas: #f3f5f1; --line: #dce2dc; --green: #2e5b45; --red: #a9483c; }
+[data-testid="stAppViewContainer"] { background: var(--canvas); color: var(--ink); }
+[data-testid="stHeader"] { background: transparent; }
+section[data-testid="stSidebar"] { background: #e9ede8; border-right: 1px solid var(--line); }
+.block-container { max-width: 1280px; padding: 1.75rem 2.5rem 3.5rem; }
+html, body, [class*="st-"], button, input, textarea { font-family: "Aptos", "Segoe UI", sans-serif; }
+h1, h2, h3, h4 { color: var(--ink); }
+h1 { font-family: Georgia, "Times New Roman", serif !important; font-size: 2rem !important; font-weight: 500 !important; }
+h2, h3 { font-weight: 600 !important; }
+[data-testid="stMarkdownContainer"] p, [data-testid="stCaptionContainer"] { color: var(--muted); }
+.brand-row { display: flex; align-items: center; gap: 0.8rem; margin: 0.2rem 0 1.4rem; }
+.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 4px; background: var(--green); color: white; font: 600 15px Georgia, serif; }
+.brand-name { margin: 0; color: var(--ink); font: 500 28px Georgia, "Times New Roman", serif; }
+.brand-rule { height: 1px; margin: 0 0 1.7rem; background: var(--line); }
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover { background: #dfe6df; }
+[data-testid="stBaseButton-primary"] { min-height: 2.8rem; padding: 0 1.2rem; border: 1px solid var(--green); border-radius: 4px; background: var(--green); color: white; font-weight: 600; transition: background 150ms ease; }
+[data-testid="stBaseButton-primary"] p { color: white !important; }
+[data-testid="stBaseButton-primary"]:hover { border-color: #244a37; background: #244a37; color: white; }
+[data-testid="stBaseButton-primary"]:focus-visible { outline: 3px solid #93b7a0; outline-offset: 2px; }
+[data-baseweb="select"] > div, .stTextInput input, .stTextArea textarea { border-color: #cbd4cd !important; border-radius: 4px !important; background: white !important; }
+.stTextInput input::placeholder, .stTextArea textarea::placeholder { color: #59645d !important; opacity: 1; }
+.stTextInput input:focus, .stTextArea textarea:focus { border-color: var(--green) !important; box-shadow: 0 0 0 1px var(--green) !important; }
+[data-testid="stAlert"] { border-radius: 4px; }
+[data-testid="stProgress"] > div > div { background: var(--green); }
+.result-panel { padding: 1.15rem 1.25rem; border: 1px solid var(--line); border-radius: 4px; background: white; }
+.result-label { margin-bottom: 0.25rem; color: var(--muted); font-size: 0.82rem; }
+.result-value { margin: 0; font: 500 1.55rem Georgia, "Times New Roman", serif; }
+.result-value.real { color: var(--green); }
+.result-value.fake { color: var(--red); }
+.result-meta { margin-top: 0.55rem; color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 700px) { .block-container { padding: 1.2rem 1rem 2.5rem; } .brand-name { font-size: 25px; } }
+button[aria-label="Expand sidebar"] [data-testid="stIconMaterial"],
+button[aria-label="Collapse sidebar"] [data-testid="stIconMaterial"] { font-size: 0 !important; }
+button[aria-label="Expand sidebar"] [data-testid="stIconMaterial"]::after { content: ">"; font: 22px/1 "Aptos", "Segoe UI", sans-serif; }
+button[aria-label="Collapse sidebar"] [data-testid="stIconMaterial"]::after { content: "<"; font: 22px/1 "Aptos", "Segoe UI", sans-serif; }
+details > summary [data-testid="stIconMaterial"] { font-size: 0 !important; }
+details > summary [data-testid="stIconMaterial"]::after { content: ">"; font: 18px/1 "Aptos", "Segoe UI", sans-serif; }
+details[open] > summary [data-testid="stIconMaterial"]::after { content: "v"; }
+@media (max-width: 700px) {
+    .block-container { padding: 1.2rem 1rem 2.5rem; }
+    .brand-name { font-size: 25px; }
+    button[aria-label="Expand sidebar"] { position: fixed !important; top: 10px !important; right: 12px !important; left: auto !important; z-index: 1002; }
+}
+</style>
+<div class="brand-row"><div class="brand-mark">NS</div><div class="brand-name">News Signal</div></div>
+<div class="brand-rule"></div>
+""", unsafe_allow_html=True)
 
 # Sidebar Navigation
 sidebar_option = st.sidebar.radio(
-    "Navigation",
-    ["🔎 Live Article Classifier", "📊 Model Comparison & Metrics", "📈 Visualizations & EDA", "ℹ️ About the Project"]
+    "Sections",
+    ["Classifier", "Results", "Visuals", "About"]
 )
 
 @st.cache_resource
@@ -79,22 +120,37 @@ def load_bert_model():
     return tokenizer, model
 
 # PAGE 1: LIVE CLASSIFIER
-if sidebar_option == "🔎 Live Article Classifier":
-    st.subheader("Test an Article with Machine Learning & Deep Learning Models")
-    
-    model_choice = st.selectbox(
-        "Choose Classification Model:",
-        ["Logistic Regression (TF-IDF Baseline)", "Support Vector Machine (LinearSVC)", "Bidirectional LSTM (PyTorch)", "BERT Fine-Tuned (HuggingFace Transformers)"]
-    )
+if sidebar_option == "Classifier":
+    st.subheader("Article classification")
+
+    available_model_options = []
+    tfidf_path = os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl")
+    if os.path.exists(tfidf_path) and os.path.exists(os.path.join(MODELS_DIR, "lr_model.pkl")):
+        available_model_options.append("Logistic Regression")
+    if os.path.exists(tfidf_path) and os.path.exists(os.path.join(MODELS_DIR, "svm_model.pkl")):
+        available_model_options.append("Linear SVM")
+    if all(os.path.exists(os.path.join(MODELS_DIR, filename)) for filename in ("lstm_vocab.pkl", "lstm_model.pt")):
+        available_model_options.append("BiLSTM")
+    if not available_model_options:
+        st.error("No complete trained model checkpoints were found in the models folder. Train a model before analyzing articles.")
+
+    model_column, sample_column = st.columns(2)
+    with model_column:
+        model_choice = st.selectbox(
+            "Model",
+            available_model_options or ["No trained models found"],
+            disabled=not available_model_options,
+        )
     
     sample_options = [
-        "Select a sample article...",
+        "No example",
         "REAL: U.S. House passes landmark infrastructure investment bill",
         "FAKE: Secret alien treaty signed in underground bunker according to leaked document",
         "REAL: NASA rover discovers organic molecules on Mars surface",
         "FAKE: Pope Francis endorses Donald Trump for President shocking Vatican officials"
     ]
-    sample_select = st.selectbox("Or choose a pre-filled sample news article:", sample_options)
+    with sample_column:
+        sample_select = st.selectbox("Example article", sample_options)
     
     default_title = ""
     default_text = ""
@@ -111,24 +167,21 @@ if sidebar_option == "🔎 Live Article Classifier":
         default_title = "Pope Francis endorses Donald Trump for President"
         default_text = "VATICAN CITY - In an unprecedented move, Pope Francis has officially endorsed Donald Trump for President of the United States, citing conservative values and the defense of religious freedom. The Vatican confirmed the endorsement via social media."
 
-    title_input = st.text_input("Article Headline / Title:", value=default_title)
-    text_input = st.text_area("Article Body Text:", value=default_text, height=180)
+    title_input = st.text_input("Headline", value=default_title, placeholder="Enter a headline")
+    text_input = st.text_area("Article text", value=default_text, height=190, placeholder="Paste the article text")
     
-    if st.button("🚀 Analyze News Article", type="primary"):
+    if st.button("Analyze article", type="primary", disabled=not available_model_options):
         if not title_input.strip() and not text_input.strip():
             st.error("Please enter a title or text to analyze.")
         else:
             combined = title_input + " " + text_input
             with st.spinner("Analyzing text and evaluating linguistic patterns..."):
-                tfidf, lr, svm = load_classical_models()
-                vocab, lstm_model = load_lstm_model()
-                bert_tokenizer, bert_model = load_bert_model()
-                
                 prediction = None
                 confidence = None
                 model_used = model_choice
                 
-                if "Logistic Regression" in model_choice:
+                if model_choice == "Logistic Regression":
+                    tfidf, lr, _ = load_classical_models()
                     if tfidf is not None and lr is not None:
                         clean = clean_text(combined)
                         features = tfidf.transform([clean])
@@ -139,7 +192,8 @@ if sidebar_option == "🔎 Live Article Classifier":
                     else:
                         st.warning("Logistic Regression model checkpoint not found. Please train models first.")
                         
-                elif "Support Vector Machine" in model_choice:
+                elif model_choice == "Linear SVM":
+                    tfidf, _, svm = load_classical_models()
                     if tfidf is not None and svm is not None:
                         clean = clean_text(combined)
                         features = tfidf.transform([clean])
@@ -151,7 +205,8 @@ if sidebar_option == "🔎 Live Article Classifier":
                     else:
                         st.warning("SVM model checkpoint not found. Please train models first.")
                         
-                elif "Bidirectional LSTM" in model_choice:
+                elif model_choice == "BiLSTM":
+                    vocab, lstm_model = load_lstm_model()
                     if vocab is not None and lstm_model is not None:
                         clean = clean_text(combined)
                         encoded = vocab.encode(clean)
@@ -167,6 +222,7 @@ if sidebar_option == "🔎 Live Article Classifier":
                         st.warning("BiLSTM model checkpoint not found. Please train models first.")
                         
                 elif "BERT" in model_choice:
+                    bert_tokenizer, bert_model = load_bert_model()
                     if bert_tokenizer is not None and bert_model is not None:
                         clean_bert = clean_text_bert(combined)
                         device = get_device()
@@ -181,23 +237,21 @@ if sidebar_option == "🔎 Live Article Classifier":
                         st.warning("BERT model checkpoint not found. Please train models first.")
 
                 if prediction is not None:
-                    col1, col2 = st.columns([1, 1])
-                    with col1:
-                        if prediction == "REAL NEWS":
-                            st.success(f"### Result: ✅ {prediction}")
-                        else:
-                            st.error(f"### Result: 🚨 {prediction}")
-                        st.write(f"**Selected Model:** {model_used}")
-                        st.write(f"**Confidence Score:** `{confidence * 100:.2f}%`")
-                        st.progress(float(confidence))
-                    with col2:
-                        st.markdown("#### Text Cleaning Preview")
-                        st.markdown(f"**Original Length:** {len(combined)} characters")
-                        st.text_area("Preprocessed Text Representation:", clean_text(combined)[:300] + "...", height=100)
+                    result_class = "real" if prediction == "REAL NEWS" else "fake"
+                    st.markdown(
+                        f'<div class="result-panel"><div class="result-label">Prediction</div>'
+                        f'<p class="result-value {result_class}">{prediction}</p>'
+                        f'<div class="result-meta">{model_used} · {confidence * 100:.1f}% confidence</div></div>',
+                        unsafe_allow_html=True,
+                    )
+                    st.progress(float(confidence))
+                    with st.expander("Cleaned text preview"):
+                        st.text(clean_text(combined)[:500])
+                    st.caption("A model prediction is not independent fact-checking.")
 
 # PAGE 2: METRICS TABLE
-elif sidebar_option == "📊 Model Comparison & Metrics":
-    st.subheader("Experimental Results & Unified Metrics Summary")
+elif sidebar_option == "Results":
+    st.subheader("Model results")
     summary_path = os.path.join(RESULTS_DIR, "metrics_summary.csv")
     if os.path.exists(summary_path):
         df_summary = pd.read_csv(summary_path)
@@ -210,21 +264,21 @@ elif sidebar_option == "📊 Model Comparison & Metrics":
     else:
         st.info("No metrics recorded yet. Run `src/train_classical.py`, `src/train_lstm.py`, and `src/train_bert.py` to populate.")
         
-    st.markdown("---")
-    st.markdown("### Confusion Matrices")
+    st.divider()
+    st.markdown("### Confusion matrices")
     cm_files = [f for f in os.listdir(CM_DIR) if f.endswith(".png")] if os.path.exists(CM_DIR) else []
     if cm_files:
         cols = st.columns(min(len(cm_files), 2))
         for idx, cf in enumerate(cm_files):
             col = cols[idx % 2]
             with col:
-                st.image(os.path.join(CM_DIR, cf), caption=cf.replace("_cm.png", "").upper() + " Confusion Matrix", use_container_width=True)
+                st.image(os.path.join(CM_DIR, cf), caption=cf.replace("_cm.png", "").upper() + " confusion matrix", width="stretch")
     else:
         st.write("Confusion matrix plots will appear here after model evaluation.")
 
-# PAGE 3: VISUALIZATIONS
-elif sidebar_option == "📈 Visualizations & EDA":
-    st.subheader("Data & Model Visualizations")
+# PAGE 3: VISUALS
+elif sidebar_option == "Visuals":
+    st.subheader("Visuals")
     plot_files = [
         ("Class Distribution", "class_distribution.png"),
         ("Word Clouds (Real vs Fake)", "wordclouds_real_vs_fake.png"),
@@ -239,27 +293,20 @@ elif sidebar_option == "📈 Visualizations & EDA":
         path = os.path.join(PLOTS_DIR, fname)
         if os.path.exists(path):
             st.markdown(f"#### {title}")
-            st.image(path, use_container_width=True)
-            st.markdown("---")
+            st.image(path, width="stretch")
+            st.divider()
 
 # PAGE 4: ABOUT
 else:
-    st.subheader("About the Project")
+    st.subheader("About")
     st.markdown("""
-    ### Fake News Detection Using Natural Language Processing
-    - **Course:** CSET485 – AI and Society, Bennett University
-    - **Team ID:** 39
-    - **Team Members:** Tanmay Awal, Pratham Mishra, Arpit Sharma, Akshat Dhaka
-    
-    #### Pipeline Architecture
-    1. **Data Ingestion & Stratified Splitting:** 44,898 articles from the ISOT dataset (21,417 Real + 23,481 Fake) split into 70% Train, 15% Val, 15% Test.
-    2. **Multi-Stage Preprocessing:**
-       - Full cleaning for TF-IDF / LSTM (Lowercasing, URLs/HTML removal, punctuation removal, digits removal, tokenization, stopword filtering, WordNet lemmatization).
-       - Light contextual cleaning for BERT.
-    3. **Model Implementations:**
-       - **Baseline:** Logistic Regression with Sublinear TF-IDF (1-2 ngrams, 50k features).
-       - **Classical:** Linear Support Vector Machine (LinearSVC).
-       - **Deep Learning:** Bidirectional LSTM with 128 embedding dims, 128 hidden units each direction, Dropout (0.3), and Dense head.
-       - **Transformer:** Fine-Tuned BERT (`bert-base-uncased`) with AdamW and linear learning rate warmup.
-    4. **Cross-Dataset Generalization:** Evaluated against William Yang Wang's LIAR dataset to rigorously assess out-of-domain robustness.
+    Three locally trained classifiers are available for comparison:
+
+    | Model | Input representation |
+    | --- | --- |
+    | Logistic Regression | TF-IDF features |
+    | Linear SVM | TF-IDF features |
+    | Bidirectional LSTM | Learned word embeddings |
+
+    Predictions reflect patterns in training data and are not independent fact-checking.
     """)

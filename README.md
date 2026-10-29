@@ -192,14 +192,17 @@ An interactive web application is provided for real-time model inference, explor
 
 ### Key Capabilities:
 - **Real-Time Classification:** Enter any news headline and body text to receive an instantaneous prediction (REAL vs FAKE) with probability confidence bars.
-- **Model Selector:** Switch seamlessly between Logistic Regression, Linear SVM, BiLSTM, and Fine-Tuned BERT.
-- **Pre-loaded Benchmarks:** Quick-test preloaded real and fake political stories.
+- **Model Selector:** Choose among trained checkpoints available in `models/`.
+- **Optional Samples:** Quick-test preloaded real and fake stories, or enter any headline and article body.
 - **Interactive Metrics Dashboard:** Inspect live metric tables and confusion matrices.
 - **Visual Analytics Tab:** View word clouds, class balance charts, and cross-dataset shift graphs.
 
 ### To Launch the Web Application:
 ```bash
-py -3 -m streamlit run app.py
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
 ```
 Access the application at `http://localhost:8501`.
 
@@ -292,7 +295,7 @@ py -3 src/visualize.py
 
 ### 7. Run Interactive Streamlit UI
 ```bash
-py -3 -m streamlit run app.py
+python -m streamlit run app.py
 ```
 
 ---
