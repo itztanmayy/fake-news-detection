@@ -16,6 +16,7 @@ import torch
 from src.utils import MODELS_DIR, RESULTS_DIR, PLOTS_DIR, CM_DIR, get_device
 from src.preprocess import clean_text, clean_text_bert
 from src.features import TfidfFeatureExtractor, LSTMVocab
+from src.gemini import GeminiAPIError, assess_news_with_gemini
 from src.train_lstm import BiLSTMClassifier
 from transformers import BertTokenizer, BertForSequenceClassification
 
@@ -56,6 +57,7 @@ h2, h3 { font-weight: 600 !important; }
 .result-value { margin: 0; font: 500 1.55rem Georgia, "Times New Roman", serif; }
 .result-value.real { color: var(--green); }
 .result-value.fake { color: var(--red); }
+.result-value.uncertain { color: var(--muted); }
 .result-meta { margin-top: 0.55rem; color: var(--muted); font-size: 0.9rem; }
 @media (max-width: 700px) { .block-container { padding: 1.2rem 1rem 2.5rem; } .brand-name { font-size: 25px; } }
 button[aria-label="Expand sidebar"] [data-testid="stIconMaterial"],
@@ -132,7 +134,7 @@ if sidebar_option == "Classifier":
     if all(os.path.exists(os.path.join(MODELS_DIR, filename)) for filename in ("lstm_vocab.pkl", "lstm_model.pt")):
         available_model_options.append("BiLSTM")
     if not available_model_options:
-        st.error("No complete trained model checkpoints were found in the models folder. Train a model before analyzing articles.")
+        st.error("No local trained model checkpoints were found. Train a model before analyzing articles.")
 
     model_column, sample_column = st.columns(2)
     with model_column:
@@ -140,6 +142,11 @@ if sidebar_option == "Classifier":
             "Model",
             available_model_options or ["No trained models found"],
             disabled=not available_model_options,
+        )
+        st.caption(
+            "The verdict uses Google's web-grounded AI. For Logistic Regression, "
+            "Linear SVM, or BiLSTM, confidence refers to that model's own prediction. "
+            "Article text is sent to Google's AI service."
         )
     
     sample_options = [
@@ -170,13 +177,18 @@ if sidebar_option == "Classifier":
     title_input = st.text_input("Headline", value=default_title, placeholder="Enter a headline")
     text_input = st.text_area("Article text", value=default_text, height=190, placeholder="Paste the article text")
     
-    if st.button("Analyze article", type="primary", disabled=not available_model_options):
+    if st.button(
+        "Analyze article",
+        type="primary",
+        disabled=not available_model_options,
+    ):
         if not title_input.strip() and not text_input.strip():
             st.error("Please enter a title or text to analyze.")
         else:
             combined = title_input + " " + text_input
-            with st.spinner("Analyzing text and evaluating linguistic patterns..."):
+            with st.spinner("Assessing article..."):
                 prediction = None
+                model_prediction = None
                 confidence = None
                 model_used = model_choice
                 
@@ -187,7 +199,7 @@ if sidebar_option == "Classifier":
                         features = tfidf.transform([clean])
                         prob = lr.predict_proba(features)[0]
                         pred_idx = np.argmax(prob)
-                        prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
+                        model_prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
                         confidence = prob[pred_idx]
                     else:
                         st.warning("Logistic Regression model checkpoint not found. Please train models first.")
@@ -199,7 +211,7 @@ if sidebar_option == "Classifier":
                         features = tfidf.transform([clean])
                         decision = svm.decision_function(features)[0]
                         pred_idx = 1 if decision > 0 else 0
-                        prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
+                        model_prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
                         # Platt-like sigmoid calibration for confidence display
                         confidence = 1 / (1 + np.exp(-abs(decision)))
                     else:
@@ -216,7 +228,7 @@ if sidebar_option == "Classifier":
                             logit = lstm_model(inp)
                             prob = torch.sigmoid(logit).item()
                         pred_idx = 1 if prob >= 0.5 else 0
-                        prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
+                        model_prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
                         confidence = prob if pred_idx == 1 else (1.0 - prob)
                     else:
                         st.warning("BiLSTM model checkpoint not found. Please train models first.")
@@ -231,20 +243,48 @@ if sidebar_option == "Classifier":
                             outputs = bert_model(**inputs)
                             probs = torch.softmax(outputs.logits, dim=1)[0].cpu().numpy()
                         pred_idx = np.argmax(probs)
-                        prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
+                        model_prediction = "REAL NEWS" if pred_idx == 1 else "FAKE NEWS"
                         confidence = probs[pred_idx]
                     else:
                         st.warning("BERT model checkpoint not found. Please train models first.")
 
+                try:
+                    assessment = assess_news_with_gemini(title_input, text_input)
+                    prediction = assessment.verdict
+                except GeminiAPIError as exc:
+                    st.error(str(exc))
+
                 if prediction is not None:
-                    result_class = "real" if prediction == "REAL NEWS" else "fake"
+                    result_class = {
+                        "REAL NEWS": "real",
+                        "FAKE NEWS": "fake",
+                        "UNVERIFIABLE": "uncertain",
+                    }[prediction]
+                    result_label = (
+                        "NEEDS VERIFICATION" if prediction == "UNVERIFIABLE" else prediction
+                    )
+                    if confidence is not None and model_prediction is not None:
+                        result_meta = (
+                            f"Web-grounded verdict · {model_used} confidence: "
+                            f"{confidence * 100:.1f}% (its prediction: {model_prediction})"
+                        )
+                    else:
+                        result_meta = (
+                            f"Web-grounded verdict · {model_used} checkpoint unavailable; "
+                            "model confidence not available"
+                        )
                     st.markdown(
                         f'<div class="result-panel"><div class="result-label">Prediction</div>'
-                        f'<p class="result-value {result_class}">{prediction}</p>'
-                        f'<div class="result-meta">{model_used} · {confidence * 100:.1f}% confidence</div></div>',
+                        f'<p class="result-value {result_class}">{result_label}</p>'
+                        f'<div class="result-meta">{result_meta}</div></div>',
                         unsafe_allow_html=True,
                     )
-                    st.progress(float(confidence))
+                    if confidence is not None:
+                        st.caption(
+                            f"{model_used} confidence applies to its own prediction "
+                            f"({model_prediction}), not Gemini's verdict."
+                        )
+                        st.progress(float(confidence))
                     with st.expander("Cleaned text preview"):
                         st.text(clean_text(combined)[:500])
                     st.caption("A model prediction is not independent fact-checking.")

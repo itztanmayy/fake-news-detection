@@ -206,6 +206,21 @@ python -m streamlit run app.py
 ```
 Access the application at `http://localhost:8501`.
 
+The classifier also includes **Gemini (Google)** with Google Search grounding.
+It searches current web sources, displays returned citations, and can still mark
+a story unverifiable when the available evidence is insufficient. Put your API
+key in the project-root `.env` file:
+```powershell
+GEMINI_API_KEY=your-api-key
+```
+Alternatively, set it in PowerShell before starting Streamlit:
+```powershell
+$env:GEMINI_API_KEY = "your-api-key"
+python -m streamlit run app.py
+```
+The `.env` file is git-ignored; never commit or share the key. Treat Gemini's
+assessment as a starting point and review its cited sources before sharing a story.
+
 ---
 
 ## 📂 Repository Structure
@@ -308,4 +323,3 @@ python -m streamlit run app.py
 ---
 **Course:** CSET485 – AI and Society | **Semester:** Odd Semester 2026 | **Bennett University**  
 *Team ID: 39 | Tanmay Awal, Pratham Mishra, Arpit Sharma, Akshat Dhaka*
-
