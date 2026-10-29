@@ -16,26 +16,24 @@ from sklearn.model_selection import train_test_split
 from concurrent.futures import ProcessPoolExecutor
 import nltk
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import wordpunct_tokenize
 from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from tqdm import tqdm
 
 from src.utils import RAW_DATA_DIR, PROCESSED_DATA_DIR, set_seed
 
-# Initialize NLTK resources
+# Load local NLTK resources without blocking application startup on downloads.
 try:
     STOPWORDS = set(stopwords.words("english"))
 except LookupError:
-    nltk.download("stopwords", quiet=True)
-    STOPWORDS = set(stopwords.words("english"))
+    STOPWORDS = set(ENGLISH_STOP_WORDS)
 
+LEMMATIZER = WordNetLemmatizer()
 try:
-    LEMMATIZER = WordNetLemmatizer()
     LEMMATIZER.lemmatize("testing")
-except Exception:
-    nltk.download("wordnet", quiet=True)
-    nltk.download("omw-1.4", quiet=True)
-    LEMMATIZER = WordNetLemmatizer()
+except LookupError:
+    LEMMATIZER = None
 
 PUNCT_TABLE = str.maketrans("", "", string.punctuation)
 
@@ -71,11 +69,11 @@ def clean_text(text: str) -> str:
     text = re.sub(r"\d+", " ", text)
     
     # 6. Tokenize
-    tokens = word_tokenize(text)
+    tokens = wordpunct_tokenize(text)
     
     # 7 & 8. Stopwords removal and Lemmatization
     cleaned_tokens = [
-        LEMMATIZER.lemmatize(token)
+        LEMMATIZER.lemmatize(token) if LEMMATIZER else token
         for token in tokens
         if token not in STOPWORDS and len(token) > 1
     ]
